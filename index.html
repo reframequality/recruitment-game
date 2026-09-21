@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Modern IT Recruitment Game</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="titleblock">
+      <h1>The Modern IT Recruitment Game</h1>
+      <div class="subtitle">HM RECRUITMENT &amp; SELECTION BOARD — FORM 27B — FOR INTERNAL MORALE PURPOSES ONLY</div>
+    </div>
+    <div class="oddsbadge">ODDS OF EMPLOYMENT: 100&nbsp;–&nbsp;1</div>
+  </header>
+
+  <div class="layout">
+    <div class="board-frame">
+      <div class="board" id="board"></div>
+    </div>
+
+    <aside>
+      <div class="panel diceZone">
+        <h2>Roll to apply</h2>
+        <div class="diceFace" id="diceFace">🎲</div>
+        <button id="rollBtn">Roll the dice</button>
+        <button id="resetBtn" class="secondary">Start a new job search</button>
+      </div>
+
+      <div class="panel">
+        <h2>Square details</h2>
+        <div id="squareInfo"><span class="sqnum">Hover or tap any square</span>to read what happens there.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Application status</h2>
+        <div class="stats">
+          <span>Current square</span><span id="statSquare">1</span>
+          <span>Turns taken</span><span id="statTurns">0</span>
+          <span>Callbacks</span><span id="statPos">0</span>
+          <span>Rejections</span><span id="statNeg">0</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Recruitment log</h2>
+        <div class="log" id="log"></div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>Any resemblance to an actual hiring process, living or dead, is unfortunately accurate.</footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="data.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
