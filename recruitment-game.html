@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Modern IT Recruitment Game</title>
+<style>
+  :root{
+    --paper:#E9E3D4;
+    --paper-dark:#DCD4BE;
+    --ink:#211F1B;
+    --ink-soft:#5B564A;
+    --stamp-red:#A3382C;
+    --ladder-green:#3D6A49;
+    --caution:#D9A62E;
+    --navy:#273349;
+    --white:#FBF9F3;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(135deg, rgba(0,0,0,0.015) 0 2px, transparent 2px 6px),
+      var(--paper);
+    color:var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    min-height:100vh;
+    padding:20px;
+  }
+  .wrap{max-width:1100px;margin:0 auto;}
+
+  header{
+    border:3px double var(--ink);
+    padding:16px 20px;
+    margin-bottom:18px;
+    background:var(--white);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  header .titleblock{flex:1; min-width:260px;}
+  h1{
+    margin:0 0 4px 0;
+    font-size:1.7rem;
+    letter-spacing:0.3px;
+  }
+  .subtitle{
+    font-family: Consolas, Menlo, monospace;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .oddsbadge{
+    border:2px solid var(--stamp-red);
+    color:var(--stamp-red);
+    font-family: Consolas, Menlo, monospace;
+    font-weight:bold;
+    font-size:0.85rem;
+    padding:8px 12px;
+    transform:rotate(-3deg);
+    white-space:nowrap;
+  }
+
+  .layout{
+    display:grid;
+    grid-template-columns: minmax(0,1fr) 300px;
+    gap:18px;
+  }
+  @media (max-width:820px){
+    .layout{grid-template-columns:1fr;}
+  }
+
+  .board-frame{
+    background:var(--white);
+    border:1px solid var(--ink);
+    padding:10px;
+  }
+  .board{
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap:4px;
+  }
+  .sq{
+    position:relative;
+    aspect-ratio:1/1;
+    border:1px solid var(--paper-dark);
+    background:var(--paper);
+    font-family: Consolas, Menlo, monospace;
+    font-size:0.62rem;
+    color:var(--ink-soft);
+    padding:3px;
+    overflow:hidden;
+  }
+  .sq .n{position:absolute; top:2px; left:3px;}
+  .sq.ladder{background:#00E100; border-color:#008a00;}
+  .sq.snake{background:#FF1414; border-color:#a30000;}
+  .sq.finish{background:#1565FF; border-color:var(--ink); }
+  .sq.tone-pos{background:#EDF3EA;}
+  .sq.tone-neg{background:#F7EBE8;}
+  .sq.tone-twist{background:#EBEEF5;}
+  .sq{cursor:help;}
+  #squareInfo{
+    font-family: Georgia, serif;
+    font-size:0.85rem;
+    line-height:1.4;
+    min-height:64px;
+  }
+  #squareInfo .sqnum{
+    font-family: Consolas, Menlo, monospace;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    display:block;
+    margin-bottom:4px;
+  }
+  .sq .icon{
+    position:absolute; bottom:2px; right:3px; font-size:0.85rem;
+  }
+  .token{
+    position:absolute;
+    bottom:2px; left:2px;
+    font-size:1.05rem;
+    transition: all 0.35s ease;
+  }
+
+  aside{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .panel{
+    background:var(--white);
+    border:1px solid var(--ink);
+    padding:14px 16px;
+  }
+  .panel h2{
+    margin:0 0 10px 0;
+    font-size:0.95rem;
+    text-transform:none;
+    border-bottom:1px solid var(--paper-dark);
+    padding-bottom:6px;
+  }
+  .stats{
+    font-family: Consolas, Menlo, monospace;
+    font-size:0.82rem;
+    display:grid;
+    grid-template-columns:1fr auto;
+    row-gap:6px;
+  }
+  .stats span:nth-child(odd){color:var(--ink-soft);}
+
+  .diceZone{text-align:center;}
+  .diceFace{
+    font-size:3.4rem;
+    line-height:1;
+    margin:6px 0 12px 0;
+    user-select:none;
+  }
+  button{
+    font-family: Georgia, serif;
+    font-size:0.95rem;
+    background:var(--navy);
+    color:var(--white);
+    border:none;
+    padding:10px 18px;
+    cursor:pointer;
+    width:100%;
+  }
+  button:disabled{
+    background:#9a9a92;
+    cursor:not-allowed;
+  }
+  button.secondary{
+    background:transparent;
+    border:1px solid var(--ink);
+    color:var(--ink);
+    margin-top:8px;
+  }
+
+  .log{
+    font-family: Consolas, Menlo, monospace;
+    font-size:0.78rem;
+    max-height:260px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column-reverse;
+    gap:8px;
+  }
+  .log .entry{
+    padding-bottom:8px;
+    border-bottom:1px dashed var(--paper-dark);
+  }
+  .log .entry.pos{color:var(--ladder-green);}
+  .log .entry.neg{color:var(--stamp-red);}
+  .log .entry.twist{color:var(--navy); font-style:italic;}
+  .log .entry.sys{color:var(--ink-soft);}
+
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(33,31,27,0.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:10;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--white);
+    border:3px double var(--ink);
+    max-width:420px;
+    width:100%;
+    padding:26px;
+    text-align:center;
+  }
+  .modal h2{margin-top:0;}
+  .modal .stamp{
+    display:inline-block;
+    border:3px solid var(--stamp-red);
+    color:var(--stamp-red);
+    font-family: Consolas, Menlo, monospace;
+    font-weight:bold;
+    padding:6px 14px;
+    transform:rotate(-6deg);
+    margin:12px 0;
+  }
+  .modal .stamp.win{border-color:var(--ladder-green); color:var(--ladder-green); transform:rotate(4deg);}
+
+  footer{
+    margin-top:16px;
+    font-family: Consolas, Menlo, monospace;
+    font-size:0.7rem;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="titleblock">
+      <h1>The Modern IT Recruitment Game</h1>
+      <div class="subtitle">HM RECRUITMENT &amp; SELECTION BOARD — FORM 27B — FOR INTERNAL MORALE PURPOSES ONLY</div>
+    </div>
+    <div class="oddsbadge">ODDS OF EMPLOYMENT: 100&nbsp;–&nbsp;1</div>
+  </header>
+
+  <div class="layout">
+    <div class="board-frame">
+      <div class="board" id="board"></div>
+    </div>
+
+    <aside>
+      <div class="panel diceZone">
+        <h2>Roll to apply</h2>
+        <div class="diceFace" id="diceFace">🎲</div>
+        <button id="rollBtn">Roll the dice</button>
+        <button id="resetBtn" class="secondary">Start a new job search</button>
+      </div>
+
+      <div class="panel">
+        <h2>Square details</h2>
+        <div id="squareInfo"><span class="sqnum">Hover or tap any square</span>to read what happens there.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Application status</h2>
+        <div class="stats">
+          <span>Current square</span><span id="statSquare">1</span>
+          <span>Turns taken</span><span id="statTurns">0</span>
+          <span>Callbacks</span><span id="statPos">0</span>
+          <span>Rejections</span><span id="statNeg">0</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Recruitment log</h2>
+        <div class="log" id="log"></div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>Any resemblance to an actual hiring process, living or dead, is unfortunately accurate.</footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const COLS = 8, ROWS = 8, TOTAL = COLS*ROWS;
+
+// classic boustrophedon numbering: row 0 = bottom row, squares 1-8 left-to-right
+function squareNumber(row, col){
+  if(row % 2 === 0) return row*COLS + col + 1;
+  return row*COLS + (COLS - col);
+}
+
+// ladders: start -> end (forward, good news)
+const LADDERS = { 4:14, 9:31, 20:38, 28:50, 40:59, 51:62 };
+// snakes: start -> end (backward, bad news)
+const SNAKES = { 17:2, 24:10, 33:6, 42:21, 56:13, 61:19 };
+
+const LADDER_TEXT = {
+  4: "CV passes the initial screen. A human, allegedly, looked at it.",
+  9: "Recruiter calls back within 48 hours. This is treated as a personality trait.",
+  20: "You're invited to a first-stage interview. It's on Teams. It's fine.",
+  28: "Hiring manager actually references something specific from your CV.",
+  40: "You clear the technical round. The 'technical round' was a chat about culture fit.",
+  51: "Verbal offer given over the phone. You are told 'don't quote me on the number yet'."
+};
+const SNAKE_TEXT = {
+  17: "ATS auto-rejects you 4 seconds after submission. It did not enjoy your 25 years of experience.",
+  24: "Recruiter goes dark. LinkedIn shows they left the agency three weeks ago.",
+  33: "Salary wasn't listed. You gave a number. You never hear from them again.",
+  42: "'We've decided to go in a different direction.' Direction: unspecified, forever.",
+  56: "Final interview. Told you're 'overqualified', which you suspect means 'too expensive'.",
+  61: "The role is quietly reopened as 'urgent' the day after rejecting you."
+};
+
+// Every non-special square (1-63, minus ladder/snake starts) has its own fixed
+// line and tone: pos, neg, twist (absurd), or neutral.
+const SQUARE_TEXT = {
+  1:  { tone:'neutral', text:"No jobs today. Better luck tomorrow." },
+  2:  { tone:'pos',     text:"Congratulations, you get to apply for a role today." },
+  3:  { tone:'neg',     text:"A recruiter pings you on LinkedIn about an 'opportunity'. Turns out they just want the names of hiring managers where you currently work." },
+  5:  { tone:'neutral', text:"You spend the evening tailoring your CV to match keywords in a job spec that closes in six hours." },
+  6:  { tone:'neg',     text:"A recruiter asks for your 'current package' before telling you anything about the role." },
+  7:  { tone:'neutral', text:"You update your LinkedIn headline. Nobody notices." },
+  8:  { tone:'neutral', text:"An old colleague forwards you a job ad 'just in case'. It's not in case of anything relevant." },
+  10: { tone:'neg',     text:"You spend an hour filling in an application form that asks for information already on your attached CV." },
+  11: { tone:'neutral', text:"A recruiter calls just to 'touch base'. Nothing has changed since last time. Nothing will." },
+  12: { tone:'pos',     text:"You find a role that looks genuinely interesting. You apply immediately, before overthinking it." },
+  13: { tone:'neg',     text:"The application portal crashes halfway through. You start again from page one." },
+  14: { tone:'pos',     text:"A friend who works at the company puts in a good word for you." },
+  15: { tone:'neutral', text:"You get an automated email confirming receipt of your application. This is the last you'll hear of it." },
+  16: { tone:'neg',     text:"You spend Saturday morning prepping for an interview that gets rescheduled by email at 8:58am Monday." },
+  18: { tone:'neutral', text:"You're added to a recruiter's 'talent pool'. You are never removed, contacted, or told what this means." },
+  19: { tone:'neutral', text:"A job spec lists 'salary: competitive'. You apply anyway, hoping." },
+  21: { tone:'neutral', text:"You get invited to a networking event. Everyone there is also job hunting." },
+  22: { tone:'pos',     text:"Someone on your former team recommends you internally at their new company." },
+  23: { tone:'neg',     text:"You're ghosted after a promising first call. You never learn why." },
+  25: { tone:'neg',     text:"You spend twenty minutes writing a cover letter for a portal with no cover letter field." },
+  26: { tone:'neg',     text:"A recruiter says 'leave it with me' and does not, in fact, leave it with themselves." },
+  27: { tone:'neg',     text:"You get a LinkedIn message: 'Loved your profile, are you open to new opportunities?' It's for a role two levels junior." },
+  29: { tone:'neutral', text:"You spot a typo in your own CV. It has been there for three months." },
+  30: { tone:'neg',     text:"A recruiter sends you a role you already turned down in March. They don't remember." },
+  31: { tone:'twist',   text:"You practice interview answers out loud in the car. A passer-by gives you a concerned look." },
+  32: { tone:'neutral', text:"You get a genuinely thoughtful rejection email, with feedback. This is rarer than the job itself." },
+  34: { tone:'neg',     text:"You spend the weekend building a portfolio piece nobody asked for and nobody will see." },
+  35: { tone:'pos',     text:"A recruiter is enthusiastic, responsive, and clearly good at their job. You are suspicious." },
+  36: { tone:'neg',     text:"You're invited to a 'quick chat', which turns out to be a fully structured 90-minute interview." },
+  37: { tone:'neg',     text:"An interviewer asks a question your CV already answers, in the paragraph they are currently holding." },
+  38: { tone:'neg',     text:"You're told the hiring manager 'really liked' you. The role is put on hold the next day." },
+  39: { tone:'neutral', text:"You update your notice period on every job board simultaneously, then immediately regret it." },
+  41: { tone:'neg',     text:"A recruiter asks if you can 'do a quick task' before the first interview. The task takes four hours." },
+  43: { tone:'neg',     text:"Someone claiming to be a 'talent partner' messages you. Their calendar link expires in nine minutes." },
+  44: { tone:'twist',   text:"You're asked to complete a personality test. The results suggest you should be a florist." },
+  45: { tone:'pos',     text:"You turn down a role because the salary band, once it finally appears, is insulting." },
+  46: { tone:'pos',     text:"A former manager writes you a genuinely glowing reference, unprompted." },
+  47: { tone:'neg',     text:"You're told the process will take 'two weeks, max'. It takes eleven." },
+  48: { tone:'neutral', text:"You get offered an interview slot at 7am. You take it anyway." },
+  49: { tone:'neg',     text:"A recruiter forgets your name mid-call and uses the previous candidate's instead." },
+  50: { tone:'twist',   text:"You spend an evening researching a company that ghosted you two months ago, just in case they call back." },
+  52: { tone:'neutral', text:"You're asked in an interview where you see yourself in five years. You do not say 'not doing this again'." },
+  53: { tone:'neg',     text:"The panel asks you to solve a problem they haven't solved internally in three years." },
+  54: { tone:'neg',     text:"You're told there's 'no news yet', for the fourth week running." },
+  55: { tone:'pos',     text:"A recruiter you liked working with reaches out about a completely different, better-fitting role." },
+  57: { tone:'neg',     text:"You get feedback that you were 'too senior' for a role you were specifically headhunted for." },
+  58: { tone:'neg',     text:"The interview runs forty minutes over. Nobody apologises." },
+  59: { tone:'neg',     text:"You're asked to provide three references before a single offer has been discussed." },
+  60: { tone:'neg',     text:"A recruiter calls to say the client wants to move fast. Three weeks pass. Nothing moves." },
+  62: { tone:'neg',     text:"You're told you're the strongest candidate. So was, apparently, someone else." },
+  63: { tone:'neg',     text:"The final interview is with someone who wasn't on the original panel and hasn't read your CV." }
+};
+
+let state = {
+  pos: 1,
+  turns: 0,
+  callbacks: 0,
+  rejections: 0,
+  finished: false
+};
+
+function buildBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  for(let r = ROWS-1; r >= 0; r--){
+    for(let c = 0; c < COLS; c++){
+      const n = squareNumber(r,c);
+      const div = document.createElement('div');
+      div.className = 'sq';
+      div.id = 'sq-' + n;
+      if(LADDERS[n]) div.classList.add('ladder');
+      if(SNAKES[n]) div.classList.add('snake');
+      if(n === TOTAL) div.classList.add('finish');
+      const num = document.createElement('span');
+      num.className = 'n';
+      num.textContent = n;
+      div.appendChild(num);
+      if(LADDERS[n]){
+        const ic = document.createElement('span');
+        ic.className = 'icon';
+        ic.textContent = '↑';
+        div.appendChild(ic);
+      }
+      if(SNAKES[n]){
+        const ic = document.createElement('span');
+        ic.className = 'icon';
+        ic.textContent = '↓';
+        div.appendChild(ic);
+      }
+      if(n === TOTAL){
+        const ic = document.createElement('span');
+        ic.className = 'icon';
+        ic.textContent = '🏁';
+        div.appendChild(ic);
+      }
+      if(SQUARE_TEXT[n]) div.classList.add('tone-' + SQUARE_TEXT[n].tone);
+      div.addEventListener('mouseenter', () => showSquareInfo(n));
+      div.addEventListener('click', () => showSquareInfo(n));
+      board.appendChild(div);
+    }
+  }
+}
+
+function infoFor(n){
+  if(n === TOTAL) return { tone:'pos', text:"The finish line. The job. The thing this entire board is about." };
+  if(LADDERS[n]) return { tone:'pos', text: LADDER_TEXT[n] };
+  if(SNAKES[n]) return { tone:'neg', text: SNAKE_TEXT[n] };
+  return SQUARE_TEXT[n] || { tone:'neutral', text:"Nothing recorded for this square." };
+}
+
+function showSquareInfo(n){
+  const info = infoFor(n);
+  const el = document.getElementById('squareInfo');
+  el.innerHTML = `<span class="sqnum">Square ${n}</span>${info.text}`;
+}
+
+function placeToken(){
+  document.querySelectorAll('.token').forEach(t => t.remove());
+  const sq = document.getElementById('sq-' + state.pos);
+  const tok = document.createElement('span');
+  tok.className = 'token';
+  tok.textContent = '🧑‍💻';
+  sq.appendChild(tok);
+}
+
+function log(text, cls){
+  const el = document.getElementById('log');
+  const entry = document.createElement('div');
+  entry.className = 'entry ' + (cls || 'sys');
+  entry.textContent = text;
+  el.appendChild(entry);
+  el.scrollTop = 0;
+}
+
+function updateStats(){
+  document.getElementById('statSquare').textContent = state.pos;
+  document.getElementById('statTurns').textContent = state.turns;
+  document.getElementById('statPos').textContent = state.callbacks;
+  document.getElementById('statNeg').textContent = state.rejections;
+}
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function rollDice(){
+  if(state.finished) return;
+  const btn = document.getElementById('rollBtn');
+  btn.disabled = true;
+  const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+  const roll = 1 + Math.floor(Math.random()*6);
+  let ticks = 0;
+  const spin = setInterval(() => {
+    document.getElementById('diceFace').textContent = faces[Math.floor(Math.random()*6)];
+    ticks++;
+    if(ticks > 8){
+      clearInterval(spin);
+      document.getElementById('diceFace').textContent = faces[roll-1];
+      state.turns++;
+      stepMove(roll, btn);
+    }
+  }, 60);
+}
+
+function stepMove(steps, btn){
+  let remaining = steps;
+  const interval = setInterval(() => {
+    if(remaining <= 0 || state.pos >= TOTAL){
+      clearInterval(interval);
+      afterMove(btn);
+      return;
+    }
+    state.pos++;
+    remaining--;
+    placeToken();
+    updateStats();
+  }, 160);
+}
+
+function afterMove(btn){
+  if(state.pos >= TOTAL){
+    state.pos = TOTAL;
+    placeToken();
+    updateStats();
+    finishGame();
+    return;
+  }
+
+  let n = state.pos;
+  showSquareInfo(n);
+
+  if(LADDERS[n]){
+    log(LADDER_TEXT[n] || "Unexpected progress.", 'pos');
+    state.callbacks++;
+    setTimeout(() => {
+      state.pos = LADDERS[n];
+      placeToken();
+      updateStats();
+      log(`Fast-tracked from square ${n} to square ${state.pos}.`, 'sys');
+      finalizeTurn(btn);
+    }, 350);
+    return;
+  }
+
+  if(SNAKES[n]){
+    log(SNAKE_TEXT[n] || "Unexpected setback.", 'neg');
+    state.rejections++;
+    setTimeout(() => {
+      state.pos = SNAKES[n];
+      placeToken();
+      updateStats();
+      log(`Knocked back from square ${n} to square ${state.pos}.`, 'sys');
+      finalizeTurn(btn);
+    }, 350);
+    return;
+  }
+
+  const entry = SQUARE_TEXT[n] || { tone:'neutral', text:"Nothing happens. This is, itself, an accurate depiction of job hunting." };
+  const cls = entry.tone === 'pos' ? 'pos' : entry.tone === 'neg' ? 'neg' : entry.tone === 'twist' ? 'twist' : 'sys';
+  log(entry.text, cls);
+  if(entry.tone === 'pos') state.callbacks++;
+  if(entry.tone === 'neg') state.rejections++;
+  updateStats();
+  finalizeTurn(btn);
+}
+
+function finalizeTurn(btn){
+  btn.disabled = false;
+}
+
+function finishGame(){
+  state.finished = true;
+  document.getElementById('rollBtn').disabled = true;
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <h2>You got the job.</h2>
+    <div class="stamp win">OFFER ACCEPTED</div>
+    <p>It took ${state.turns} rounds of applying, ${state.rejections} rejections and ${state.callbacks} moments of false hope.</p>
+    <p style="font-family:Consolas,Menlo,monospace;font-size:0.8rem;color:var(--ink-soft);">You have officially beaten 100:1 odds. Onboarding starts Monday. There is no laptop.</p>
+    <button onclick="resetGame()">Do it all again</button>
+  `;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function resetGame(){
+  state = { pos:1, turns:0, callbacks:0, rejections:0, finished:false };
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('rollBtn').disabled = false;
+  document.getElementById('diceFace').textContent = '🎲';
+  buildBoard();
+  placeToken();
+  updateStats();
+  log('New application cycle started. Good luck out there.', 'sys');
+}
+
+document.getElementById('rollBtn').addEventListener('click', rollDice);
+document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+buildBoard();
+placeToken();
+updateStats();
+showSquareInfo(1);
+log('Application submitted. The waiting begins.', 'sys');
+</script>
+</body>
+</html>
