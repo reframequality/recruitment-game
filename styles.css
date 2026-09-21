@@ -87,9 +87,9 @@ h1{
   overflow:hidden;
 }
 .sq .n{position:absolute; top:2px; left:3px;}
-.sq.ladder{background:#E4EDE3; border-color:var(--ladder-green);}
-.sq.snake{background:#F3E3E0; border-color:var(--stamp-red);}
-.sq.finish{background:var(--caution); border-color:var(--ink); }
+.sq.ladder{background:#00E100; border-color:#008a00;}
+.sq.snake{background:#FF1414; border-color:#a30000;}
+.sq.finish{background:#1565FF; border-color:var(--ink); }
 .sq.tone-pos{background:#EDF3EA;}
 .sq.tone-neg{background:#F7EBE8;}
 .sq.tone-twist{background:#EBEEF5;}
