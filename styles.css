@@ -8,6 +8,15 @@
   --caution:#D9A62E;
   --navy:#273349;
   --white:#FBF9F3;
+  --bright-green:#00E100;
+  --bright-green-dark:#008a00;
+  --bright-red:#FF1414;
+  --bright-red-dark:#a30000;
+  --bright-blue:#1565FF;
+  --chest-gold:#FFD400;
+  --chest-gold-dark:#B38F00;
+  --choice-violet:#B44DFF;
+  --choice-violet-dark:#7A1FCC;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
@@ -68,13 +77,26 @@ h1{
   background:var(--white);
   border:1px solid var(--ink);
   padding:10px;
+  position:relative;
 }
 .board{
   display:grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
   gap:4px;
+  position:relative;
 }
+#boardArt{
+  position:absolute;
+  pointer-events:none;
+  z-index:1;
+}
+.ladder-rail{ stroke:var(--bright-green-dark); stroke-width:3.5; stroke-linecap:round; }
+.ladder-rung{ stroke:var(--bright-green-dark); stroke-width:2.5; stroke-linecap:round; }
+.snake-body{ fill:none; stroke:var(--bright-red-dark); stroke-width:6; stroke-linecap:round; opacity:0.85; }
+.snake-head{ fill:var(--bright-red-dark); }
+.snake-eye{ fill:var(--white); }
+
 .sq{
   position:relative;
   aspect-ratio:1/1;
@@ -85,15 +107,39 @@ h1{
   color:var(--ink-soft);
   padding:3px;
   overflow:hidden;
+  z-index:2;
 }
-.sq .n{position:absolute; top:2px; left:3px;}
-.sq.ladder{background:#00E100; border-color:#008a00;}
-.sq.snake{background:#FF1414; border-color:#a30000;}
-.sq.finish{background:#1565FF; border-color:var(--ink); }
+.sq .n{position:absolute; top:2px; left:3px; z-index:3;}
+.sq.ladder{background:var(--bright-green); border-color:var(--bright-green-dark);}
+.sq.snake{background:var(--bright-red); border-color:var(--bright-red-dark);}
+.sq.chest{background:var(--chest-gold); border-color:var(--chest-gold-dark);}
+.sq.choice{background:var(--choice-violet); border-color:var(--choice-violet-dark);}
+.sq.finish{background:var(--bright-blue); border-color:var(--ink);}
 .sq.tone-pos{background:#EDF3EA;}
 .sq.tone-neg{background:#F7EBE8;}
 .sq.tone-twist{background:#EBEEF5;}
 .sq{cursor:help;}
+.sq.snake::after{
+  content:"REJECTED";
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family: Consolas, Menlo, monospace;
+  font-weight:bold;
+  font-size:0.42rem;
+  letter-spacing:0.5px;
+  color:rgba(90,0,0,0.45);
+  border:1px solid rgba(90,0,0,0.4);
+  transform:rotate(-14deg);
+  pointer-events:none;
+  z-index:1;
+  white-space:nowrap;
+}
+@media (max-width:520px){
+  .sq.snake::after{ display:none; }
+}
 #squareInfo{
   font-family: Georgia, serif;
   font-size:0.85rem;
@@ -108,13 +154,14 @@ h1{
   margin-bottom:4px;
 }
 .sq .icon{
-  position:absolute; bottom:2px; right:3px; font-size:0.85rem;
+  position:absolute; bottom:2px; right:3px; font-size:0.85rem; z-index:3;
 }
 .token{
   position:absolute;
   bottom:2px; left:2px;
   font-size:1.05rem;
   transition: all 0.35s ease;
+  z-index:4;
 }
 
 aside{
@@ -171,6 +218,22 @@ button.secondary{
   margin-top:8px;
 }
 
+.powerups{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.powerBtn{
+  background:var(--choice-violet-dark);
+  font-size:0.8rem;
+  padding:9px 10px;
+  text-align:left;
+}
+.powerBtn:disabled{
+  background:#c8c2b4;
+  color:var(--ink-soft);
+}
+
 .log{
   font-family: Consolas, Menlo, monospace;
   font-size:0.78rem;
@@ -202,12 +265,23 @@ button.secondary{
 .modal{
   background:var(--white);
   border:3px double var(--ink);
-  max-width:420px;
+  max-width:460px;
   width:100%;
   padding:26px;
   text-align:center;
 }
 .modal h2{margin-top:0;}
+.modal .modalTag{
+  display:inline-block;
+  font-family: Consolas, Menlo, monospace;
+  font-size:0.7rem;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  color:var(--choice-violet-dark);
+  border:1px solid var(--choice-violet-dark);
+  padding:3px 8px;
+  margin-bottom:10px;
+}
 .modal .stamp{
   display:inline-block;
   border:3px solid var(--stamp-red);
@@ -218,7 +292,39 @@ button.secondary{
   transform:rotate(-6deg);
   margin:12px 0;
 }
-.modal .stamp.win{border-color:var(--ladder-green); color:var(--ladder-green); transform:rotate(4deg);}
+.modal .stamp.win{border-color:var(--bright-green-dark); color:var(--bright-green-dark); transform:rotate(4deg);}
+.modal .endTitle{
+  font-weight:bold;
+  color:var(--navy);
+  font-size:1rem;
+}
+
+.roleGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:14px 0;
+}
+@media (max-width:480px){
+  .roleGrid{grid-template-columns:1fr;}
+}
+.roleBtn{
+  background:var(--bright-blue);
+  font-size:0.85rem;
+  padding:12px 10px;
+}
+
+.choiceRow{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+.choiceRow button{
+  background:var(--bright-green-dark);
+}
+.choiceRow button:last-child{
+  background:var(--stamp-red);
+}
 
 footer{
   margin-top:16px;
@@ -226,4 +332,57 @@ footer{
   font-size:0.7rem;
   color:var(--ink-soft);
   text-align:center;
+  line-height:1.6;
+}
+footer a{ color:var(--ink-soft); }
+
+.confettiLayer{
+  position:fixed; inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:20;
+}
+.confettiPiece{
+  position:absolute;
+  top:-12px;
+  width:8px;
+  height:14px;
+  opacity:0.9;
+  animation-name:confettiFall;
+  animation-timing-function:ease-in;
+  animation-fill-mode:forwards;
+}
+@keyframes confettiFall{
+  to{ transform:translateY(105vh) rotate(360deg); opacity:0.85; }
+}
+
+.rejectStampLayer{
+  position:fixed; inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  z-index:20;
+}
+.rejectStamp{
+  border:6px solid var(--stamp-red);
+  color:var(--stamp-red);
+  font-family: Consolas, Menlo, monospace;
+  font-weight:bold;
+  font-size:2.6rem;
+  padding:10px 24px;
+  background:rgba(251,249,243,0.85);
+  opacity:0;
+  animation:stampSlam 0.9s ease-out forwards;
+}
+@keyframes stampSlam{
+  0%{ transform:rotate(-12deg) scale(3.2); opacity:0; }
+  60%{ transform:rotate(-12deg) scale(0.95); opacity:1; }
+  100%{ transform:rotate(-12deg) scale(1); opacity:1; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .token{ transition:none; }
+  .confettiPiece{ display:none; }
+  .rejectStamp{ animation:none; opacity:1; transform:rotate(-12deg); }
 }

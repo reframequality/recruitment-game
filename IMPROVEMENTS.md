@@ -2,21 +2,23 @@
 
 Ordered roughly by payoff for a LinkedIn audience.
 
-## 1. Make it shareable (highest value)
-- "Share my result" button at the end: copies text like *"I got the job in 41 rounds, 12 rejections, 7 moments of false hope. #odds 100-1"* to the clipboard.
-- Punchy end-state titles based on stats (e.g. "Ghosted 6 times: Resilience Level Expert", "Two rejections: suspiciously lucky").
-- Open Graph and Twitter meta tags plus a preview image so the link unfurls nicely on LinkedIn.
+## 1. Make it shareable — done
+- "Share my result" button at the end: copies text like *"I got the job in 41 rounds, 12 rejections, 7 moments of false hope..."* to the clipboard.
+- Punchy end-state titles based on stats (e.g. "Ghosted 10 times: Resilience Level Expert", "Suspiciously lucky").
+- Open Graph and Twitter meta tags plus a preview image (`og-image.png`) so the link unfurls nicely on LinkedIn.
 - Small footer credit and link back to Reframe Quality.
 
-## 2. Add a little agency (currently pure luck)
-- Limited-use power-ups: "Use your network" (reroll), "Tailor the CV" (+1 to next roll), "Follow up politely" (skip one snake).
-- Occasional choice cards: "Recruiter offers a 'quick task'. Do it / Decline."
+## 2. Add a little agency — done (currently pure luck)
+- Limited-use power-ups: "Use your network" (best of two on the next roll), "Tailor the CV" (+1 to next roll), "Follow up politely" (waive one snake bite).
+- Community Chest squares draw a random hiring-event card that nudges you 1-2 squares forward or back.
+- Decision-point squares present a genuine choice with different outcomes either way.
 - Pick your persona (Tester, Developer, BA, PM, CTO) with role-specific squares and jokes.
+- Snakes now heavily outnumber ladders (10 vs 4), reflecting how hard the market is right now.
 
-## 3. Visual polish
-- Draw actual snakes and ladders as SVG lines across the board instead of only arrow icons.
-- Confetti on win, a rubber-stamp "REJECTED" animation on snakes.
-- Respect `prefers-reduced-motion`.
+## 3. Visual polish — done
+- Real snake and ladder artwork drawn as an SVG overlay across the board instead of only arrow icons.
+- Confetti on win, a rubber-stamp "REJECTED" animation on snake bites (plus a subtle permanent watermark on snake squares).
+- Respects `prefers-reduced-motion` throughout (dice, movement, confetti, stamp).
 
 ## 4. Replayability
 - Random event deck layered over the fixed board so repeat plays differ.

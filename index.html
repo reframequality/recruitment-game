@@ -1,9 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Modern IT Recruitment Game</title>
+<meta name="description" content="A snakes-and-ladders satire of the modern IT hiring process. Pick a role, dodge the ATS, and try to beat 100:1 odds.">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Modern IT Recruitment Game">
+<meta property="og:locale" content="en_GB">
+<meta property="og:title" content="The Modern IT Recruitment Game">
+<meta property="og:description" content="A snakes-and-ladders satire of the modern IT hiring process. Pick a role, dodge the ATS, and try to beat 100:1 odds.">
+<meta property="og:image" content="og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Modern IT Recruitment Game">
+<meta name="twitter:description" content="A snakes-and-ladders satire of the modern IT hiring process. Pick a role, dodge the ATS, and try to beat 100:1 odds.">
+<meta name="twitter:image" content="og-image.png">
+
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -31,6 +47,15 @@
       </div>
 
       <div class="panel">
+        <h2>Career toolkit</h2>
+        <div class="powerups">
+          <button id="powNetwork" class="powerBtn" title="Your next roll takes the best of two dice.">🤝 Use your network</button>
+          <button id="powTailor" class="powerBtn" title="Add +1 to your next roll.">📝 Tailor your CV</button>
+          <button id="powFollowUp" class="powerBtn" title="Waive the next snake bite.">🙏 Follow up politely</button>
+        </div>
+      </div>
+
+      <div class="panel">
         <h2>Square details</h2>
         <div id="squareInfo"><span class="sqnum">Hover or tap any square</span>to read what happens there.</div>
       </div>
@@ -38,6 +63,7 @@
       <div class="panel">
         <h2>Application status</h2>
         <div class="stats">
+          <span>Playing as</span><span id="statRole">–</span>
           <span>Current square</span><span id="statSquare">1</span>
           <span>Turns taken</span><span id="statTurns">0</span>
           <span>Callbacks</span><span id="statPos">0</span>
@@ -52,7 +78,10 @@
     </aside>
   </div>
 
-  <footer>Any resemblance to an actual hiring process, living or dead, is unfortunately accurate.</footer>
+  <footer>
+    Any resemblance to an actual hiring process, living or dead, is unfortunately accurate.<br>
+    Made by <a href="https://github.com/reframequality" target="_blank" rel="noopener">Reframe Quality</a>.
+  </footer>
 </div>
 
 <div class="overlay" id="overlay">
