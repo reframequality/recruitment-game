@@ -41,5 +41,5 @@ Ordered roughly by payoff for a LinkedIn audience.
 
 ## 7. Publishing
 - GitHub Pages hosting (private repos need a paid plan for Pages; otherwise make the repo public when ready, or use Netlify/Cloudflare Pages).
-- Regenerate `og-image.png` to show the new board art.
+- `og-image.png` regenerated from the live board art (Oct 2026).
 - Add a licence and a short LinkedIn launch post draft ("Daily #N — can you beat my run?").
