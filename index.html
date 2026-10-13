@@ -4,22 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Modern IT Recruitment Game</title>
-<meta name="description" content="A snakes-and-ladders satire of the modern IT hiring process. Pick a role, dodge the ATS, and try to beat 100:1 odds.">
+<meta name="description" content="A snakes-and-ladders satire of the modern IT hiring process. Race the internal candidate, survive the market, negotiate the offer — and try to beat 100:1 odds.">
+<meta name="theme-color" content="#273349">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="The Modern IT Recruitment Game">
 <meta property="og:locale" content="en_GB">
 <meta property="og:title" content="The Modern IT Recruitment Game">
-<meta property="og:description" content="A snakes-and-ladders satire of the modern IT hiring process. Pick a role, dodge the ATS, and try to beat 100:1 odds.">
+<meta property="og:description" content="A snakes-and-ladders satire of the modern IT hiring process. Race the internal candidate, survive the market, negotiate the offer — and try to beat 100:1 odds.">
 <meta property="og:image" content="og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Modern IT Recruitment Game">
-<meta name="twitter:description" content="A snakes-and-ladders satire of the modern IT hiring process. Pick a role, dodge the ATS, and try to beat 100:1 odds.">
+<meta name="twitter:description" content="A snakes-and-ladders satire of the modern IT hiring process. Race the internal candidate, survive the market, negotiate the offer — and try to beat 100:1 odds.">
 <meta name="twitter:image" content="og-image.png">
 
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💼</text></svg>">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,30 +30,78 @@
   <header>
     <div class="titleblock">
       <h1>The Modern IT Recruitment Game</h1>
-      <div class="subtitle">HM RECRUITMENT &amp; SELECTION BOARD — FORM 27B — FOR INTERNAL MORALE PURPOSES ONLY</div>
+      <div class="subtitle">HM RECRUITMENT &amp; SELECTION BOARD — FORM 27B/6 — FOR INTERNAL MORALE PURPOSES ONLY</div>
     </div>
-    <div class="oddsbadge">ODDS OF EMPLOYMENT: 100&nbsp;–&nbsp;1</div>
+    <div class="headerSide">
+      <div class="oddsbadge">ODDS OF EMPLOYMENT: 100&nbsp;–&nbsp;1</div>
+      <div class="headerBtns">
+        <button id="helpBtn" class="iconBtn" aria-label="How to play" title="How to play">❓</button>
+        <button id="soundBtn" class="iconBtn" aria-label="Sound on" title="Sound on/off">🔊</button>
+      </div>
+    </div>
   </header>
 
+  <div class="marketBanner" id="marketBanner" hidden></div>
+
   <div class="layout">
-    <div class="board-frame">
-      <div class="board" id="board"></div>
+    <div class="boardCol">
+      <div class="board-frame" id="boardFrame">
+        <div class="board" id="board"></div>
+      </div>
+      <ul class="legend" aria-label="Board legend">
+        <li><span class="sw ladder"></span>Ladder: fast-tracked</li>
+        <li><span class="sw snake"></span>Snake: rejected</li>
+        <li><span class="sw chest"></span>Hiring event</li>
+        <li><span class="sw choice"></span>Decision</li>
+        <li><span class="sw finish"></span>The offer</li>
+        <li><span class="legendTok">👔</span>Internal candidate</li>
+      </ul>
     </div>
 
     <aside>
       <div class="panel diceZone">
         <h2>Roll to apply</h2>
-        <div class="diceFace" id="diceFace">🎲</div>
-        <button id="rollBtn">Roll the dice</button>
+        <div class="dieStage" id="dieStage">
+          <div class="die" id="die"></div>
+        </div>
+        <div class="rollNote" id="rollNote">Pick a role to begin</div>
+        <button id="rollBtn" class="primary">Roll the dice</button>
+        <div class="keyHint">or press <kbd>Space</kbd></div>
         <button id="resetBtn" class="secondary">Start a new job search</button>
+      </div>
+
+      <div class="panel">
+        <h2>The race</h2>
+        <div class="race">
+          <div class="raceRow"><span class="raceWho" id="raceYouLabel">You</span><div class="bar"><div class="fill you" id="raceYou"></div></div><span class="raceNum" id="raceYouNum">1</span></div>
+          <div class="raceRow"><span class="raceWho">👔 Internal</span><div class="bar"><div class="fill rival" id="raceRival"></div></div><span class="raceNum" id="raceRivalNum">1</span></div>
+        </div>
+        <div class="moraleRow">
+          <span class="moraleFace" id="moraleFace" aria-hidden="true">🙂</span>
+          <div class="moraleCol">
+            <div class="moraleLabel"><span>Morale</span><span id="moraleNum">60</span></div>
+            <div class="bar"><div class="fill morale" id="moraleBar"></div></div>
+          </div>
+        </div>
       </div>
 
       <div class="panel">
         <h2>Career toolkit</h2>
         <div class="powerups">
-          <button id="powNetwork" class="powerBtn" title="Your next roll takes the best of two dice.">🤝 Use your network</button>
-          <button id="powTailor" class="powerBtn" title="Add +1 to your next roll.">📝 Tailor your CV</button>
-          <button id="powFollowUp" class="powerBtn" title="Waive the next snake bite.">🙏 Follow up politely</button>
+          <button id="powNetwork" class="powerBtn" data-key="1" title="Your next roll takes the best of two dice. (Key: 1)">🤝 Use your network <span class="count" id="cntNetwork">1</span></button>
+          <button id="powTailor" class="powerBtn" data-key="2" title="Add +1 to your next roll. (Key: 2)">📝 Tailor your CV <span class="count" id="cntTailor">1</span></button>
+          <button id="powFollowUp" class="powerBtn" data-key="3" title="Waive the next snake bite. (Key: 3)">🙏 Follow up politely <span class="count" id="cntFollowUp">1</span></button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Application status</h2>
+        <div class="stats">
+          <span>Playing as</span><span id="statRole">–</span>
+          <span>Current square</span><span id="statSquare">1</span>
+          <span>Weeks searching</span><span id="statTurns">0</span>
+          <span>Callbacks</span><span id="statPos">0</span>
+          <span>Rejections</span><span id="statNeg">0</span>
         </div>
       </div>
 
@@ -61,19 +111,14 @@
       </div>
 
       <div class="panel">
-        <h2>Application status</h2>
-        <div class="stats">
-          <span>Playing as</span><span id="statRole">–</span>
-          <span>Current square</span><span id="statSquare">1</span>
-          <span>Turns taken</span><span id="statTurns">0</span>
-          <span>Callbacks</span><span id="statPos">0</span>
-          <span>Rejections</span><span id="statNeg">0</span>
-        </div>
+        <h2>Recruitment log</h2>
+        <div class="log" id="log"></div>
       </div>
 
       <div class="panel">
-        <h2>Recruitment log</h2>
-        <div class="log" id="log"></div>
+        <h2>Trophy cabinet <span class="trophyCount" id="trophyCount"></span></h2>
+        <div class="record" id="record"></div>
+        <div class="badges" id="badges"></div>
       </div>
     </aside>
   </div>
@@ -85,8 +130,10 @@
 </div>
 
 <div class="overlay" id="overlay">
-  <div class="modal" id="modal"></div>
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
 </div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="srOnly" id="liveRegion" aria-live="polite"></div>
 
 <script src="data.js"></script>
 <script src="game.js"></script>
