@@ -203,18 +203,24 @@ const MARKETS = [
     snakeText:{ 19:"An AI screener rejects you for 'low enthusiasm', detected from your choice of font.", 36:"An AI interviewer asks you to 'describe a time you showed resilience', then crashes mid-answer." } },
   { id:'boom',     icon:'🚀', name:'Funding boom',            text:"A wave of funding rounds lands. Two extra ladders appear on the board.", ladders:{ 10:27, 31:45 },
     ladderText:{ 10:"A freshly funded startup slides into your DMs: 'We move fast. Can you start Monday?'", 31:"A Series B scale-up skips the take-home test entirely. Nobody can quite believe it." } },
-  { id:'freeze',   icon:'🧊', name:'Hiring freeze',           text:"Budgets are frozen. The internal candidate moves slower, but every knock hits your morale 50% harder.", rivalMax:2, moraleLoss:1.5 },
+  { id:'freeze',   icon:'🧊', name:'Hiring freeze',           text:"Budgets are frozen. The internal candidate moves slower, but every knock hits your morale 50% harder.", rivalMax:4, moraleLoss:1.5 },
   { id:'nepotism', icon:'👨‍👦', name:"The CEO's nephew applied", text:"The internal candidate starts six squares ahead of you. Nobody will say why.", rivalStart:7 },
   { id:'bonanza',  icon:'📞', name:'Recruiter bonanza',       text:"Recruiters are everywhere. Community Chest effects are doubled — good and bad.", chestMult:2 },
-  { id:'yearend',  icon:'💷', name:'Year-end budget flush',   text:"Use-it-or-lose-it budget. Nobody rolls a 1 — and that includes the internal candidate.", minRoll:2 }
+  { id:'yearend',  icon:'💷', name:'Year-end budget flush',   text:"Use-it-or-lose-it budget. You never roll a 1. The internal candidate never did anyway.", minRoll:2 }
 ];
+
+// The internal candidate moves min-max squares every week (a market can lower
+// max), and an event from RIVAL_EVENTS fires with eventChance.
+const RIVAL = { min:2, max:5, eventChance:0.12 };
 
 // Things that happen to the internal candidate now and then.
 const RIVAL_EVENTS = [
   { text:"The internal candidate's reference check stalls. Their old boss is on sabbatical.", delta:-4 },
   { text:"The internal candidate forgets to turn up to their own interview.", delta:-3 },
   { text:"The internal candidate plays five-a-side with the hiring manager. Every Thursday.", delta:3 },
-  { text:"The internal candidate's 'stretch project' gets a shout-out at the all-hands.", delta:4 }
+  { text:"The internal candidate's 'stretch project' gets a shout-out at the all-hands.", delta:4 },
+  { text:"The other external candidate drops out. The internal candidate is now 'the obvious choice'.", delta:3 },
+  { text:"The hiring manager describes the internal candidate as 'a known quantity'. It is meant as a compliment.", delta:2 }
 ];
 
 // Final offer negotiation: a push-your-luck mini-game on reaching the last square.
@@ -237,6 +243,30 @@ const NEGOTIATION = {
   ]
 };
 
+// An accepted offer isn't a job until you start. After accepting, there is a
+// `chance` that something pulls it anyway, which ends the run. Tuned with the
+// rival speed so that roughly one job hunt in ten ends in a hire.
+const OFFER_FATE = {
+  chance: 0.8,
+  pulled: [
+    { stamp:'BUDGET PULLED',  text:"Finance has pulled the budget for the role. The role was 'never formally approved'. Nobody can say who approved the interviews." },
+    { stamp:'ON HOLD',        text:"The company announces an Operating Model Review. All onboarding is suspended pending the review. The review has no end date." },
+    { stamp:'OVERQUALIFIED',  text:"After flying through every interview, you're told you're 'overqualified'. They're worried you'd get bored. You are now bored." },
+    { stamp:'AI ONLY',        text:"The CEO has decided all new hires will be AI agents. No humans, effective immediately. The agent starts Monday. It has your desk." },
+    { stamp:'REORG',          text:"A reorg lands the day before your start date. Your hiring manager now reports to someone who 'doesn't see the need for the role'." },
+    { stamp:'HEADCOUNT FROZEN', text:"Headcount has been moved to 'next financial year'. They'll 'definitely be in touch in April'. Which April is not specified." },
+    { stamp:'OFFSHORED',      text:"The role has been moved offshore to save costs. They ask if you'd be happy to help with the handover. Unpaid." },
+    { stamp:'MANAGER LEFT',   text:"Your hiring manager has resigned. Their replacement wants to 'revisit all open requisitions'. Yours is open no longer." },
+    { stamp:'NEW CTO',        text:"A new CTO starts and freezes all hiring 'until the tech strategy is clear'. The tech strategy will never be clear." },
+    { stamp:'CHANGED MIND',   text:"The internal candidate 'reconsidered' and now wants the role after all. They get it. Of course they get it." }
+  ],
+  survive: [
+    "Finance tried to pull the budget, but someone had already sent the contract. HR couldn't work out how to un-send it.",
+    "The Operating Model Review was postponed by an Operating Model Review. Your start date stands.",
+    "The CEO's AI-only memo arrives one day after your contract is signed. You are, legally, too late to replace."
+  ]
+};
+
 // Trophy cabinet. Unlocked badges persist in the browser across runs.
 const ACHIEVEMENTS = [
   { id:'hired',     icon:'💼', name:'Gainfully employed', desc:'Get the job.' },
@@ -249,5 +279,6 @@ const ACHIEVEMENTS = [
   { id:'photo',     icon:'📸', name:'Photo finish',       desc:'Get the job with the internal candidate within 6 squares of the end.' },
   { id:'nepotism',  icon:'👔', name:'Internal candidate', desc:'Lose the role to the internal candidate.' },
   { id:'daily',     icon:'📅', name:'Daily grind',        desc:'Finish a daily challenge.' },
-  { id:'polymath',  icon:'🎓', name:'Polymath',           desc:'Get the job with every role.' }
+  { id:'polymath',  icon:'🎓', name:'Polymath',           desc:'Get the job with every role.' },
+  { id:'pulled',    icon:'🪦', name:'So close',           desc:'Accept an offer, then have it pulled before you start.' }
 ];

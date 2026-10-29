@@ -134,7 +134,7 @@ function newState(mode, role, market){
     morale: 60, skipTurns: 0, burnouts: 0,
     powerups: { network:1, tailor:1, followUp:1 }, powerupsUsed: 0,
     networkBoost: false, tailorBoost: false, skipSnake: false,
-    pushes: 0, rescinds: 0, salary: null,
+    pushes: 0, rescinds: 0, salary: null, pulledBy: null,
     history: [], unlockedThisRun: [],
     rivalWarned: false, finished: false, busy: true
   };
@@ -662,7 +662,7 @@ function startRun(mode, role){
 
 function showMarketReveal(){
   const m = state.market;
-  const rivalMax = m.rivalMax || 3;
+  const rivalMax = m.rivalMax || RIVAL.max;
   Sound.card();
   openModal(`
     <span class="modalTag">This week's market</span>
@@ -671,7 +671,7 @@ function showMarketReveal(){
     <p>${m.text}</p>
     <div class="rivalIntro">
       <span class="rivalBig">👔</span>
-      <p><strong>You're up against the internal candidate.</strong> They move ${m.minRoll ? 2 : 1}–${rivalMax} squares a week and never meet a snake — because of course they don't. Reach square ${TOTAL} first, then negotiate your offer.</p>
+      <p><strong>You're up against the internal candidate.</strong> They move ${RIVAL.min}–${rivalMax} squares a week and never meet a snake — because of course they don't. Reach square ${TOTAL} first, negotiate your offer, then hope it survives until your start date.</p>
     </div>
     <button id="goBtn" class="primary" data-autofocus>Start applying</button>
   `, 'flip');
@@ -695,6 +695,7 @@ function showHelp(){
       <li>👔 <strong>The internal candidate</strong> moves every week. If they reach ${TOTAL} first, the role is theirs.</li>
       <li>🙂 <strong>Morale</strong> drops with every knock. Hit zero and you burn out: one week off.</li>
       <li>🏁 <strong>The offer</strong>: on reaching ${TOTAL}, accept or push for more money. Each push is riskier. Push too far and the offer is rescinded.</li>
+      <li>🪦 <strong>The start date</strong>: an accepted offer isn't a job until you start. Budgets, reorgs and CEOs can still pull it.</li>
       <li>🧰 <strong>Power-ups</strong>: network (best of two dice), tailor CV (+1), follow up (block a snake). Hiring events can refill them.</li>
       <li>📅 <strong>Daily challenge</strong>: everyone gets the same market and dice. Share your result and compare.</li>
     </ul>
@@ -1020,7 +1021,8 @@ async function negotiate(){
       closeModal();
       state.salary = offer;
       state.pushes = pushes;
-      await winGame();
+      if(await offerSurvives()) await winGame();
+      else await loseGame();
       return true;
     }
     const risk = negotiationRisk(pushes);
@@ -1056,13 +1058,34 @@ async function negotiate(){
   }
 }
 
+// After accepting: the gap between "yes" and day one, where offers go to die.
+async function offerSurvives(){
+  log(`Offer accepted: £${state.salary}k. Now you just have to make it to your start date.`, 'pos');
+  openModal(`<span class="modalTag">Final stage — the start date</span><h2>Waiting for the contract…</h2><p class="offerSub">HR says it's "with legal". Legal says it's "with HR".</p><div class="thinking"><span></span><span></span><span></span></div>`, 'offer');
+  Sound.tick();
+  await sleep(1800);
+  closeModal();
+  if(rngs.events() >= OFFER_FATE.chance){
+    log(cosmeticPick(OFFER_FATE.survive), 'twist');
+    await sleep(400);
+    return true;
+  }
+  const fate = OFFER_FATE.pulled[Math.floor(rngs.events() * OFFER_FATE.pulled.length)];
+  state.pulledBy = fate;
+  state.rejections++;
+  unlock('pulled');
+  log(fate.text, 'neg');
+  showEventCard('Before your start date', fate.text, '', 'bad');
+  return false;
+}
+
 async function rivalTurn(){
   const m = state.market;
-  let mv = 1 + Math.floor(rngs.rival() * (m.rivalMax || 3));
+  let mv = RIVAL.min + Math.floor(rngs.rival() * ((m.rivalMax || RIVAL.max) - RIVAL.min + 1));
   if(m.minRoll) mv = Math.max(mv, m.minRoll);
   const eventRoll = rngs.rival();
   const ev = RIVAL_EVENTS[Math.floor(rngs.rival() * RIVAL_EVENTS.length)];
-  if(eventRoll < 0.12){
+  if(eventRoll < RIVAL.eventChance){
     mv += ev.delta;
     log(`👔 ${ev.text}`, ev.delta > 0 ? 'neg' : 'pos');
     showEventCard('The internal candidate', ev.text, `👔 ${ev.delta > 0 ? '+' : '−'}${Math.abs(ev.delta)}`, ev.delta > 0 ? 'bad' : 'good');
@@ -1095,6 +1118,11 @@ function getEndTitle(){
   return "You got the job. Somehow.";
 }
 function getLoseTitle(){
+  if(state.pulledBy){
+    if(state.pushes) return `You negotiated £${state.salary}k for a job that no longer exists.`;
+    if(state.turns <= 14) return "Fastest hire-and-fire in company history. You never even got a laptop.";
+    return "So close. You'd already told your current boss.";
+  }
   const gap = TOTAL - state.pos;
   if(state.rescinds) return "Greed, then nepotism. A classic double.";
   if(gap <= 6) return `So close. You were ${gap} square${gap === 1 ? '' : 's'} from the offer.`;
@@ -1115,7 +1143,9 @@ function shareTextFor(won){
   const head = state.mode === 'daily' ? `The Modern IT Recruitment Game — Daily #${state.dailyNo}` : 'The Modern IT Recruitment Game';
   const result = won
     ? `${role.icon} ${role.label}: hired in ${state.turns} weeks at £${state.salary}k${state.pushes ? ` (pushed ${state.pushes}×)` : ''}`
-    : `${role.icon} ${role.label}: lost to the internal candidate on square ${state.pos} of ${TOTAL}`;
+    : state.pulledBy
+      ? `${role.icon} ${role.label}: accepted £${state.salary}k after ${state.turns} weeks. Then: ${state.pulledBy.stamp.toLowerCase()}.`
+      : `${role.icon} ${role.label}: lost to the internal candidate on square ${state.pos} of ${TOTAL}`;
   const tally = `🐍 ${state.bites}  🪜 ${state.climbs}  🫠 ${state.burnouts}${state.rescinds ? `  💸 ${state.rescinds}` : ''}`;
   const url = /^https?:/.test(location.protocol) ? location.origin + location.pathname : '';
   return [head, result, `${m.icon} ${m.name}`, historyGrid(), tally, url ? `Can you beat it? ${url}` : '', '#JobHunting #ITRecruitment']
@@ -1151,7 +1181,7 @@ async function winGame(){
   if(state.powerupsUsed === 0) unlock('purist');
   if(TOTAL - state.rival <= 6) unlock('photo');
   if(ROLES.every(r => store.rolesWon.includes(r.id))) unlock('polymath');
-  log(`Offer accepted: £${state.salary}k. Onboarding starts Monday. There is no laptop.`, 'pos');
+  log(`Day one. You actually start. Onboarding is on Monday. There is no laptop.`, 'pos');
   updateAll();
   Sound.win();
   launchConfetti();
@@ -1162,13 +1192,17 @@ async function winGame(){
 async function loseGame(){
   state.finished = true;
   state.busy = false;
-  state.history.push('💀');
+  const pulled = !!state.pulledBy;
+  state.history.push(pulled ? '🪦' : '💀');
   recordResult(false);
-  unlock('nepotism');
-  log("'We've decided to go with an internal candidate.'", 'neg');
+  if(!pulled){
+    unlock('nepotism');
+    log("'We've decided to go with an internal candidate.'", 'neg');
+  }
   updateAll();
   Sound.lose();
-  triggerStamp('POSITION FILLED');
+  shake();
+  triggerStamp(pulled ? state.pulledBy.stamp : 'POSITION FILLED');
   await sleep(900);
   showEndModal(false);
 }
@@ -1182,8 +1216,9 @@ function showEndModal(won){
   const salaryHtml = won ? `<div class="offerAmount">£${state.salary}k</div><p class="offerSub">${role.label}${state.pushes ? ` · pushed ${state.pushes}× for +£${state.salary - role.salary}k` : ' · opening offer accepted'}</p>` : '';
   openModal(`
     <span class="modalTag">${state.mode === 'daily' ? `Daily challenge #${state.dailyNo}` : 'Free play'} · ${state.market.icon} ${state.market.name}</span>
-    <h2>${won ? 'You got the job.' : "We've decided to go with an internal candidate."}</h2>
-    <div class="stamp ${won ? 'win' : ''}">${won ? 'OFFER ACCEPTED' : 'POSITION FILLED'}</div>
+    <h2>${won ? 'You got the job.' : state.pulledBy ? 'The offer has been withdrawn.' : "We've decided to go with an internal candidate."}</h2>
+    <div class="stamp ${won ? 'win' : ''}">${won ? 'OFFER ACCEPTED' : state.pulledBy ? state.pulledBy.stamp : 'POSITION FILLED'}</div>
+    ${!won && state.pulledBy ? `<p class="pulledReason">${state.pulledBy.text}</p>` : ''}
     ${salaryHtml}
     <p class="endTitle">${won ? getEndTitle() : getLoseTitle()}</p>
     <div class="endStats">

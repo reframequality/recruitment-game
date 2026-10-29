@@ -614,6 +614,7 @@ button.secondary:disabled{background:transparent; color:#9a9a92; border-color:#c
 }
 .modal .stamp.win{border-color:var(--bright-green-dark); color:var(--bright-green-dark); transform:rotate(4deg);}
 .modal .endTitle{font-weight:bold; color:var(--navy); font-size:1rem;}
+.modal .pulledReason{font-style:italic; color:var(--ink-soft); margin:0 0 8px;}
 
 .modeRow{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:8px 0 14px;}
 .modeBtn{
