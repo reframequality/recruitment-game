@@ -1,5 +1,7 @@
 # The Modern IT Recruitment Game
 
+**Play it:** https://reframequality.github.io/recruitment-game/
+
 A snakes-and-ladders satire of the modern IT hiring process. Pick a role, survive the market, race the internal candidate to the offer, then decide how hard to negotiate. Snakes heavily outnumber ladders, because the market is brutal right now.
 
 Plain HTML, CSS and JavaScript. No build step, no dependencies, no external assets (sounds are synthesised in the browser). Open `index.html` in a browser, or serve the folder from any static host.
@@ -32,3 +34,11 @@ Plain HTML, CSS and JavaScript. No build step, no dependencies, no external asse
 ## Balance
 
 Tuned by simulation: a sensible player wins roughly 70% of the time; pushing for more money three times drops that to about 43%. The AI-screening market is the hardest (about 60%), Funding boom the easiest (about 80%).
+
+## Disclaimer
+
+This is a work of satire, written with affection for everyone stuck in the hiring process, on either side of the table. Characters and scenarios are fictional and not based on any real person, recruiter or company. Product names mentioned (LinkedIn, Teams, Slack) are trademarks of their owners, who are not affiliated with or endorsing this game. Nothing here is career advice.
+
+## Licence
+
+[MIT](LICENSE). The software is provided as is, without warranty of any kind.

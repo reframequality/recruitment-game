@@ -754,6 +754,7 @@ footer{
   line-height:1.6;
 }
 footer a{color:var(--ink-soft);}
+footer .disclaimer{max-width:60ch; margin:8px auto 0; font-size:0.62rem; opacity:0.8;}
 
 /* confetti & stamp */
 .confettiLayer{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:20;}
